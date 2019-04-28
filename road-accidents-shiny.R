@@ -11,12 +11,28 @@ library(htmlwidgets)
 library(showtext)
 library(data.table)
 
+
 # font
 font_add_google(name = "Montserrat", family = "mont")
 showtext_auto()
 
+
 # load data
-accidents_raw <- read_csv("./road-accidents/locations.csv")
+load_data <- function(){
+  if(!dir.exists("./road-accidents")){
+    print("Create a directory './road-accidents/' to continue.")
+  }else{
+    if(!file.exists("./road-accidents/locations.csv")){
+      cat('\n Download may take a few minutes...\n')
+      url <- "http://www.tmr.qld.gov.au/~/media/aboutus/corpinfo/Open%20data/crash/locations.csv"
+      download.file(url, destfile = "./road-accidents/locations.csv", method="libcurl")
+    }
+    accidents_raw <- read_csv("./road-accidents/locations.csv")
+  }
+  return(accidents_raw)
+}
+accidents_raw <- load_data()
+
 
 # set my theme and colours
 my_theme <- function(){
