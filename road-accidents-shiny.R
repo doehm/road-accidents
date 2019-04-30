@@ -10,6 +10,7 @@ library(htmltools)
 library(htmlwidgets)
 library(showtext)
 library(data.table)
+library(lazyeval)
 
 
 # font
@@ -18,20 +19,7 @@ showtext_auto()
 
 
 # load data
-load_data <- function(){
-  if(!dir.exists("./road-accidents")){
-    print("Create a directory './road-accidents/' to continue.")
-  }else{
-    if(!file.exists("./road-accidents/locations.csv")){
-      cat('\n Download may take a few minutes...\n')
-      url <- "http://www.tmr.qld.gov.au/~/media/aboutus/corpinfo/Open%20data/crash/locations.csv"
-      download.file(url, destfile = "./road-accidents/locations.csv", method="libcurl")
-    }
-    accidents_raw <- read_csv("./road-accidents/locations.csv")
-  }
-  return(accidents_raw)
-}
-accidents_raw <- load_data()
+load("./road-accidents/road-accident-data.Rdata")
 
 
 # set my theme and colours
@@ -61,7 +49,8 @@ speed_limit <- c("...", accidents_raw$Crash_Speed_Limit %>% unique %>% sort)
 road_feature <- c("...", accidents_raw$Crash_Roadway_Feature %>% unique %>% sort)
 crash_type <- c("...", accidents_raw$Crash_Nature %>% unique %>% sort)
 crash_severity <- c("...", accidents_raw$Crash_Severity %>% unique %>% sort)
-loc_list <- colnames(accidents_raw)[str_detect(colnames(accidents_raw), "Loc")]
+loc_type <- colnames(accidents_raw)[str_detect(colnames(accidents_raw), "Loc_ABS|Loc_Local")]
+loc_list <- sapply(loc_type, function(x) accidents_raw[[x]] %>% unique %>% sort)
 
 
 # js code for collapsible panel
@@ -89,8 +78,40 @@ ui <- navbarPage("Road accidents in Queensland", id="road",
                               
                                 p("Select filters to view accident data over time and road, weather and vehicle type features"),
                                 
+                                # select statistical area
+                                selectInput("loc", "Location category", loc_type, selected = "Loc_ABS_Statistical_Area_3"),
+                                
+                                # if sa2 select area with sa2
+                                conditionalPanel(
+                                  condition = "input.loc == 'Loc_ABS_Statistical_Area_2'",
+                                  selectInput("sa2", "Location", loc_list[["Loc_ABS_Statistical_Area_2"]], selected = "Brisbane City")
+                                ),
+                                
+                                # if sa3 select area with sa3
+                                conditionalPanel(
+                                  condition = "input.loc == 'Loc_ABS_Statistical_Area_3'",
+                                  selectInput("sa3", "Location", loc_list[["Loc_ABS_Statistical_Area_3"]], selected = "Brisbane Inner")
+                                ),
+                                
+                                # if sa4 select area with sa4
+                                conditionalPanel(
+                                  condition = "input.loc == 'Loc_ABS_Statistical_Area_4'",
+                                  selectInput("sa4", "Location", loc_list[["Loc_ABS_Statistical_Area_4"]], selected = "Brisbane Inner City")
+                                ),
+                                
+                                # if lga select area with lga
+                                conditionalPanel(
+                                  condition = "input.loc == 'Loc_Local_Government_Area'",
+                                  selectInput("lga", "Location", loc_list[["Loc_Local_Government_Area"]], selected = "Brisbane City")
+                                ),
+                                
+                                # if remoteness select area with remoteness
+                                conditionalPanel(
+                                  condition = "input.loc == 'Loc_ABS_Remoteness'",
+                                  selectInput("remote", "Location", loc_list[["Loc_ABS_Remoteness"]], selected = "Major Cities")
+                                ),
+                                
                                 sliderInput("year", label = "Year", min = min(year), max = max(year), value = c(2013, 2018), round = TRUE, step = 1),
-                                selectInput("sa3", "SA3", sa3_list, selected = "Brisbane Inner"),
                                 selectInput("day_of_week", "Day of the week", day_of_week, selected = "..."),
                                 selectInput("month", "Month", month, selected = "..."),
                                 selectInput("weather", "Weather condition", weather_conditions, selected = "..."),
@@ -110,7 +131,9 @@ ui <- navbarPage("Road accidents in Queensland", id="road",
                               p(HTML('Created by <a target="_blank" href="https://twitter.com/danoehm">@danoehm</a> / <a target="_blank" href="http://gradientdescending.com/">gradientdescending.com</a>')),
                               plotOutput("casualty", height = 250),
                               plotOutput("unit", height = 250),
-                              plotOutput("time_series", height = 250)
+                              plotOutput("time_series", height = 250),
+                              plotOutput("fatality_rate", height = 250)
+                              #textOutput("rate_text")
                             )
                           )
                 ),
@@ -130,10 +153,13 @@ ui <- navbarPage("Road accidents in Queensland", id="road",
 # server function
 server <- function(input, output, session) {
   
-  selectData <- reactive({
+  mainFilter <- reactive({
     accidents_raw %>% 
-      filter(Loc_ABS_Statistical_Area_3 == input$sa3) %>% 
-      filter(Crash_Year >= input$year[1] & Crash_Year <= input$year[2]) %>% 
+      {if(input$loc == "Loc_ABS_Statistical_Area_2") filter(., Loc_ABS_Statistical_Area_2 == input$sa2) else .} %>% 
+      {if(input$loc == "Loc_ABS_Statistical_Area_3") filter(., Loc_ABS_Statistical_Area_3 == input$sa3) else .} %>% 
+      {if(input$loc == "Loc_ABS_Statistical_Area_4") filter(., Loc_ABS_Statistical_Area_4 == input$sa4) else .} %>% 
+      {if(input$loc == "Loc_Local_Government_Area") filter(., Loc_Local_Government_Area == input$lga) else .} %>% 
+      {if(input$loc == "Loc_ABS_Remoteness") filter(., Loc_ABS_Remoteness == input$remote) else .} %>% 
       {if(input$day_of_week != "...") filter(., Crash_Day_Of_Week == input$day_of_week) else .} %>% 
       {if(input$month != "...") filter(., Crash_Month == input$month) else .} %>% 
       {if(input$weather != "...") filter(., Crash_Atmospheric_Condition == input$weather) else .} %>% 
@@ -146,6 +172,33 @@ server <- function(input, output, session) {
       mutate(fatality = Count_Casualty_Fatality > 0)
   })
   
+  selectData <- reactive({
+    mainFilter() %>% 
+      filter(Crash_Year >= input$year[1] & Crash_Year <= input$year[2])
+  })
+  
+  # data frame for fatality rate simulation
+  fatalityRate <- reactive({
+    
+    accidents_raw %>% 
+      {if(input$loc == "Loc_ABS_Statistical_Area_2") filter(., Loc_ABS_Statistical_Area_2 == input$sa2) else .} %>% 
+      {if(input$loc == "Loc_ABS_Statistical_Area_3") filter(., Loc_ABS_Statistical_Area_3 == input$sa3) else .} %>% 
+      {if(input$loc == "Loc_ABS_Statistical_Area_4") filter(., Loc_ABS_Statistical_Area_4 == input$sa4) else .} %>% 
+      {if(input$loc == "Loc_Local_Government_Area") filter(., Loc_Local_Government_Area == input$lga) else .} %>% 
+      {if(input$loc == "Loc_ABS_Remoteness") filter(., Loc_ABS_Remoteness == input$remote) else .} %>% 
+      filter(Crash_Year == 2017) %>% 
+      summarise(
+        count = length(Crash_Ref_Number),
+        n_fatalities = sum(Count_Casualty_Fatality)
+      )
+    
+  })
+  
+  # draws from the posterior
+  fatalityRateSim <- reactive({
+    rgamma(1e4, shape = 1.5 + fatalityRate()$n_fatalities, rate = 84 + fatalityRate()$count)
+  })
+    
   # count of casualty type
   output$casualty <- renderPlot({
     selectData() %>% 
@@ -187,16 +240,33 @@ server <- function(input, output, session) {
   
   # crashes over time
   output$time_series <- renderPlot({
-    accidents_raw %>% 
-      filter(Loc_ABS_Statistical_Area_3 == input$sa3 & Crash_Year != 2018) %>% 
+    df <- mainFilter() %>% 
+      filter(Crash_Year != 2018) %>% 
       group_by(Crash_Year) %>% 
-      summarise(count = n()) %>% 
-      ggplot(aes(x = Crash_Year, y = count)) +
-      geom_area(fill = "darkmagenta", alpha = 0.7) + 
+      summarise(count = length(Crash_Ref_Number))
+    
+    ggplot(df, aes(x = Crash_Year, y = count)) +
+      geom_line(col = "darkmagenta") +
+      geom_point(col = "darkmagenta") +
+      coord_cartesian(ylim = c(0, max(df$count))) +
       my_theme() +
       labs(title = "Number of accidents from 2001-2017")
   })
   
+  # rate dist
+  output$fatality_rate <- renderPlot({
+    data.frame(x = 100*fatalityRateSim()) %>% 
+      ggplot(aes(x = x)) +
+      geom_histogram(fill = "turquoise") +
+      my_theme() +
+      labs(title = "Rate of road accident fatalities per 100 crashes per year")
+  })
+  
+  output$rate_text <- renderText({
+    round(100*median(fatalityRateSim()), 1)
+  })
+  
+  # leaflet map
   output$accident_map <- renderLeaflet({
     leaflet(selectData()) %>% 
       addProviderTiles(providers$Stamen.Toner, group = "Black and white") %>% 
@@ -244,9 +314,10 @@ server <- function(input, output, session) {
   output$crash_data <- renderDataTable({
     selectData()
   }, options = list(pageLength = 15))
+  
 }
 
 
 # run app
-shinyApp(ui, server)
+shinyApp(ui, server, options = list(launch.browser = TRUE))
 
