@@ -71,12 +71,10 @@ ui <- navbarPage("Road accidents in Queensland", id="road",
                             uiOutput("leafl"),
                             absolutePanel(
                               id = "controls", class = "panel panel-default", fixed = TRUE,
-                              draggable = TRUE, top = 200, left = "auto", right = 20, bottom = "auto",
+                              draggable = TRUE, top = 90, left = "auto", right = 180, bottom = "auto",
                               width = 250, height = "auto",
                               HTML('<button data-toggle="collapse" data-target="#demo">Show filters</button>'),
                               tags$div(id = 'demo',  class="collapse",
-                              
-                                p("Select filters to view accident data over time and road, weather and vehicle type features"),
                                 
                                 # select statistical area
                                 selectInput("loc", "Location category", loc_type, selected = "Loc_ABS_Statistical_Area_3"),
@@ -129,10 +127,10 @@ ui <- navbarPage("Road accidents in Queensland", id="road",
                               draggable = TRUE, top = 180, left = 20, right = "auto", bottom = "auto",
                               width = 400, height = "auto",
                               p(HTML('Created by <a target="_blank" href="https://twitter.com/danoehm">@danoehm</a> / <a target="_blank" href="http://gradientdescending.com/">gradientdescending.com</a>')),
-                              plotOutput("casualty", height = 250),
-                              plotOutput("unit", height = 250),
-                              plotOutput("time_series", height = 250),
-                              plotOutput("fatality_rate", height = 250)
+                              plotOutput("casualty", height = 200),
+                              plotOutput("unit", height = 200),
+                              plotOutput("time_series", height = 200),
+                              plotOutput("fatality_rate", height = 200)
                               #textOutput("rate_text")
                             )
                           )
@@ -259,7 +257,7 @@ server <- function(input, output, session) {
       ggplot(aes(x = x)) +
       geom_histogram(fill = "turquoise") +
       my_theme() +
-      labs(title = "Rate of road accident fatalities per 100 crashes per year")
+      labs(title = "Rate of road accident fatalities\n per 100 crashes per year")
   })
   
   output$rate_text <- renderText({
