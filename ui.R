@@ -102,7 +102,7 @@ navbarPage("Road accidents in Queensland", id="road",
                               
                               absolutePanel(
                                 id = "controls", class = "panel panel-default", fixed = TRUE,
-                                draggable = TRUE, top = 90, left = 180, right = "auto", bottom = "auto",
+                                draggable = TRUE, top = 180, left = 20, right = "auto", bottom = "auto",
                                 width = 400, height = "auto",
                                 p(HTML('Created by <a target="_blank" href="https://twitter.com/danoehm">@danoehm</a> / <a target="_blank" href="http://gradientdescending.com/">gradientdescending.com</a>')),
                                 plotOutput("casualty", height = 200),
