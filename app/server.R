@@ -130,7 +130,7 @@ function(input, output, session) {
       ggplot(aes(x = x)) +
       geom_histogram(fill = "turquoise") +
       my_theme() +
-      labs(title = "Rate of road accident fatalities per 100 crashes per year")
+      labs(title = "Rate of road accident fatalities\nper 100 crashes per year")
   })
   
   output$rate_text <- renderText({
