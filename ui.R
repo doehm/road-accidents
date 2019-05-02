@@ -1,44 +1,6 @@
 # queensland road accident data
 
-# libraries
-library(tidyverse)
 library(shiny)
-library(leaflet)
-library(leaflet.extras)
-library(magrittr)
-library(htmltools)
-library(htmlwidgets)
-library(showtext)
-library(data.table)
-library(lazyeval)
-
-# load data
-load("./data/road-accident-data.Rdata")
-
-# set filter vars
-year <- accidents_raw$Crash_Year %>% unique %>% sort
-sa3_list <- accidents_raw$Loc_ABS_Statistical_Area_3 %>% unique %>% sort
-day_of_week <- c("...", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-month <- c("...", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
-weather_conditions <- c("...", accidents_raw$Crash_Atmospheric_Condition %>% unique %>% sort)
-driving_conditions <- c("...", accidents_raw$Crash_Lighting_Condition %>% unique %>% sort)
-road_condition <- c("...", accidents_raw$Crash_Road_Surface_Condition %>% unique %>% sort)
-speed_limit <- c("...", accidents_raw$Crash_Speed_Limit %>% unique %>% sort)
-road_feature <- c("...", accidents_raw$Crash_Roadway_Feature %>% unique %>% sort)
-crash_type <- c("...", accidents_raw$Crash_Nature %>% unique %>% sort)
-crash_severity <- c("...", accidents_raw$Crash_Severity %>% unique %>% sort)
-loc_type <- colnames(accidents_raw)[str_detect(colnames(accidents_raw), "Loc_ABS|Loc_Local")]
-loc_list <- sapply(loc_type, function(x) accidents_raw[[x]] %>% unique %>% sort)
-
-
-# js code for collapsible panel
-jscode <- '
-$(document).on("shiny:connected", function(e) {
-var jsHeight = window.innerHeight;
-Shiny.onInputChange("GetScreenHeight",jsHeight);
-});
-'
-
 
 # ui function
 navbarPage("Road accidents in Queensland", id="road",
@@ -87,6 +49,7 @@ navbarPage("Road accidents in Queensland", id="road",
                                            selectInput("remote", "Location", loc_list[["Loc_ABS_Remoteness"]], selected = "Major Cities")
                                          ),
                                          
+                                         #TODO: make all these conditional
                                          sliderInput("year", label = "Year", min = min(year), max = max(year), value = c(2013, 2018), round = TRUE, step = 1),
                                          selectInput("day_of_week", "Day of the week", day_of_week, selected = "..."),
                                          selectInput("month", "Month", month, selected = "..."),
@@ -105,6 +68,7 @@ navbarPage("Road accidents in Queensland", id="road",
                                 draggable = TRUE, top = 180, left = 20, right = "auto", bottom = "auto",
                                 width = 400, height = "auto",
                                 p(HTML('Created by <a target="_blank" href="https://twitter.com/danoehm">@danoehm</a> / <a target="_blank" href="http://gradientdescending.com/">gradientdescending.com</a>')),
+                                p(HTML('Source: Transport and Main Roads Qld')),
                                 plotOutput("casualty", height = 200),
                                 plotOutput("unit", height = 200),
                                 plotOutput("time_series", height = 200),
