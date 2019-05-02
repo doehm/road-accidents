@@ -1,6 +1,9 @@
 # queensland road accident data
 
 library(shiny)
+library(tidyverse)
+library(magrittr)
+library(data.table)
 
 # load data
 load("./data/road-accident-data.Rdata")
