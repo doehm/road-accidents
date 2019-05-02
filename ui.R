@@ -2,6 +2,23 @@
 
 library(shiny)
 
+# load data
+load("./data/road-accident-data.Rdata")
+
+# set filter vars
+year <- accidents_raw$Crash_Year %>% unique %>% sort
+day_of_week <- c("...", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+month <- c("...", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+weather_conditions <- c("...", accidents_raw$Crash_Atmospheric_Condition %>% unique %>% sort)
+driving_conditions <- c("...", accidents_raw$Crash_Lighting_Condition %>% unique %>% sort)
+road_condition <- c("...", accidents_raw$Crash_Road_Surface_Condition %>% unique %>% sort)
+speed_limit <- c("...", accidents_raw$Crash_Speed_Limit %>% unique %>% sort)
+road_feature <- c("...", accidents_raw$Crash_Roadway_Feature %>% unique %>% sort)
+crash_type <- c("...", accidents_raw$Crash_Nature %>% unique %>% sort)
+crash_severity <- c("...", accidents_raw$Crash_Severity %>% unique %>% sort)
+loc_type <- colnames(accidents_raw)[str_detect(colnames(accidents_raw), "Loc_ABS|Loc_Local")]
+loc_list <- sapply(loc_type, function(x) accidents_raw[[x]] %>% unique %>% sort)
+
 # js code for making the map fit the screen height
 jscode <- '
   $(document).on("shiny:connected", function(e) {
