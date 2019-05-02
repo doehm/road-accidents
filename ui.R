@@ -95,12 +95,12 @@ navbarPage("Road accidents in Queensland", id="road",
                                 id = "controls", class = "panel panel-default", fixed = TRUE,
                                 draggable = TRUE, top = 180, left = 20, right = "auto", bottom = "auto",
                                 width = 400, height = "auto",
-                                p(HTML('Created by <a target="_blank" href="https://twitter.com/danoehm">@danoehm</a> / <a target="_blank" href="http://gradientdescending.com/">gradientdescending.com</a>')),
-                                p(HTML('Source: Dept. of Transport and Main Roads Qld')),
                                 plotOutput("casualty", height = 200),
                                 plotOutput("unit", height = 200),
                                 plotOutput("time_series", height = 200),
-                                plotOutput("fatality_rate", height = 200)
+                                plotOutput("fatality_rate", height = 200),
+                                p(HTML('Created by <a target="_blank" href="https://twitter.com/danoehm">@danoehm</a> / <a target="_blank" href="http://gradientdescending.com/">gradientdescending.com</a>')),
+                                p(HTML('Source: Dept. of Transport and Main Roads Qld'))
                               )
                           )
                  ),
