@@ -48,14 +48,6 @@ loc_type <- colnames(accidents_raw)[str_detect(colnames(accidents_raw), "Loc_ABS
 loc_list <- sapply(loc_type, function(x) accidents_raw[[x]] %>% unique %>% sort)
 
 
-# js code for making the map fit the screen height
-jscode <- '
-  $(document).on("shiny:connected", function(e) {
-  var jsHeight = window.innerHeight;
-  Shiny.onInputChange("GetScreenHeight",jsHeight);
-  });
-  '
-
 function(input, output, session) {
   
   mainFilter <- reactive({

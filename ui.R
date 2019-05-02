@@ -2,6 +2,14 @@
 
 library(shiny)
 
+# js code for making the map fit the screen height
+jscode <- '
+  $(document).on("shiny:connected", function(e) {
+  var jsHeight = window.innerHeight;
+  Shiny.onInputChange("GetScreenHeight",jsHeight);
+  });
+  '
+
 # ui function
 navbarPage("Road accidents in Queensland", id="road",
                  tabPanel("Heat map",
