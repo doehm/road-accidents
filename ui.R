@@ -19,7 +19,7 @@ speed_limit <- c("...", accidents_raw$Crash_Speed_Limit %>% unique %>% sort)
 road_feature <- c("...", accidents_raw$Crash_Roadway_Feature %>% unique %>% sort)
 crash_type <- c("...", accidents_raw$Crash_Nature %>% unique %>% sort)
 crash_severity <- c("...", accidents_raw$Crash_Severity %>% unique %>% sort)
-loc_type <- colnames(accidents_raw)[str_detect(colnames(accidents_raw), "Loc_ABS|Loc_Local")]
+loc_type <- c("State level", colnames(accidents_raw)[str_detect(colnames(accidents_raw), "Loc_ABS|Loc_Local")])
 loc_list <- sapply(loc_type, function(x) accidents_raw[[x]] %>% unique %>% sort)
 
 # js code for making the map fit the screen height
@@ -77,7 +77,7 @@ navbarPage("Road accidents in Queensland", id="road",
                                            selectInput("remote", "Location", loc_list[["Loc_ABS_Remoteness"]], selected = "Major Cities")
                                          ),
                                          
-                                         #TODO: make all these conditional
+                                         #TODO: make all these conditional but use uioutput
                                          sliderInput("year", label = "Year", min = min(year), max = max(year), value = c(2013, 2018), round = TRUE, step = 1),
                                          selectInput("day_of_week", "Day of the week", day_of_week, selected = "..."),
                                          selectInput("month", "Month", month, selected = "..."),
@@ -113,4 +113,5 @@ navbarPage("Road accidents in Queensland", id="road",
                      dataTableOutput("crash_data")
                    )
                  )
+           #TODO: another tab with fatality rate estimates
 )

@@ -27,7 +27,7 @@ my_theme <- function(){
       axis.text = element_text(family = "mont", size = 12),
       axis.text.x = element_text(angle = 45, vjust = 0.5),
       axis.title = element_blank(),
-      plot.title = element_text(family = "mont", hjust = 0.5)
+      plot.title = element_text(family = "mont", hjust = 0.5, face = "bold")
     )
 }
 
@@ -37,20 +37,20 @@ function(input, output, session) {
   
   mainFilter <- reactive({
     accidents_raw %>% 
-    {if(input$loc == "Loc_ABS_Statistical_Area_2") filter(., Loc_ABS_Statistical_Area_2 == input$sa2) else .} %>% 
-    {if(input$loc == "Loc_ABS_Statistical_Area_3") filter(., Loc_ABS_Statistical_Area_3 == input$sa3) else .} %>% 
-    {if(input$loc == "Loc_ABS_Statistical_Area_4") filter(., Loc_ABS_Statistical_Area_4 == input$sa4) else .} %>% 
-    {if(input$loc == "Loc_Local_Government_Area") filter(., Loc_Local_Government_Area == input$lga) else .} %>% 
-    {if(input$loc == "Loc_ABS_Remoteness") filter(., Loc_ABS_Remoteness == input$remote) else .} %>% 
-    {if(input$day_of_week != "...") filter(., Crash_Day_Of_Week == input$day_of_week) else .} %>% 
-    {if(input$month != "...") filter(., Crash_Month == input$month) else .} %>% 
-    {if(input$weather != "...") filter(., Crash_Atmospheric_Condition == input$weather) else .} %>% 
-    {if(input$driving_conditions != "...") filter(., Crash_Lighting_Condition == input$driving_conditions) else .} %>% 
-    {if(input$road_condition != "...") filter(., Crash_Road_Surface_Condition == input$road_condition) else .} %>% 
-    {if(input$speed_limit != "...") filter(., Crash_Speed_Limit == input$speed_limit) else .} %>% 
-    {if(input$road_feature != "...") filter(., Crash_Roadway_Feature == input$road_feature) else .} %>% 
-    {if(input$crash_type != "...") filter(., Crash_Nature == input$crash_type) else .} %>% 
-    {if(input$crash_severity != "...") filter(., Crash_Severity == input$crash_severity) else .} %>% 
+      {if(input$loc == "Loc_ABS_Statistical_Area_2") filter(., Loc_ABS_Statistical_Area_2 == input$sa2) else .} %>% 
+      {if(input$loc == "Loc_ABS_Statistical_Area_3") filter(., Loc_ABS_Statistical_Area_3 == input$sa3) else .} %>% 
+      {if(input$loc == "Loc_ABS_Statistical_Area_4") filter(., Loc_ABS_Statistical_Area_4 == input$sa4) else .} %>% 
+      {if(input$loc == "Loc_Local_Government_Area") filter(., Loc_Local_Government_Area == input$lga) else .} %>% 
+      {if(input$loc == "Loc_ABS_Remoteness") filter(., Loc_ABS_Remoteness == input$remote) else .} %>% 
+      {if(input$day_of_week != "...") filter(., Crash_Day_Of_Week == input$day_of_week) else .} %>% 
+      {if(input$month != "...") filter(., Crash_Month == input$month) else .} %>% 
+      {if(input$weather != "...") filter(., Crash_Atmospheric_Condition == input$weather) else .} %>% 
+      {if(input$driving_conditions != "...") filter(., Crash_Lighting_Condition == input$driving_conditions) else .} %>% 
+      {if(input$road_condition != "...") filter(., Crash_Road_Surface_Condition == input$road_condition) else .} %>% 
+      {if(input$speed_limit != "...") filter(., Crash_Speed_Limit == input$speed_limit) else .} %>% 
+      {if(input$road_feature != "...") filter(., Crash_Roadway_Feature == input$road_feature) else .} %>% 
+      {if(input$crash_type != "...") filter(., Crash_Nature == input$crash_type) else .} %>% 
+      {if(input$crash_severity != "...") filter(., Crash_Severity == input$crash_severity) else .} %>% 
       mutate(fatality = Count_Casualty_Fatality > 0)
   })
   
@@ -187,7 +187,7 @@ function(input, output, session) {
   output$leafl <- renderUI({
     if(!is.null(input$GetScreenHeight)){
       width  <- session$clientData$output_image1_width
-      print(session$clientData)
+      # print(session$clientData)
       height <- session$clientData$output_image1_height
       leafletOutput("accident_map", width = "100%", height = input$GetScreenHeight)
     }
