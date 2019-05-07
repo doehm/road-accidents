@@ -17,7 +17,7 @@ load("./data/road-accident-data.Rdata")
 try({
   font_add_google(name = "Montserrat", family = "mont")
   showtext_auto()
-  }, TRUE)
+}, TRUE)
 
 # set my theme and colours
 my_theme <- function(){
@@ -63,11 +63,11 @@ function(input, output, session) {
   fatalityRate <- reactive({
     
     accidents_raw %>% 
-    {if(input$loc == "Loc_ABS_Statistical_Area_2") filter(., Loc_ABS_Statistical_Area_2 == input$sa2) else .} %>% 
-    {if(input$loc == "Loc_ABS_Statistical_Area_3") filter(., Loc_ABS_Statistical_Area_3 == input$sa3) else .} %>% 
-    {if(input$loc == "Loc_ABS_Statistical_Area_4") filter(., Loc_ABS_Statistical_Area_4 == input$sa4) else .} %>% 
-    {if(input$loc == "Loc_Local_Government_Area") filter(., Loc_Local_Government_Area == input$lga) else .} %>% 
-    {if(input$loc == "Loc_ABS_Remoteness") filter(., Loc_ABS_Remoteness == input$remote) else .} %>% 
+      {if(input$loc == "Loc_ABS_Statistical_Area_2") filter(., Loc_ABS_Statistical_Area_2 == input$sa2) else .} %>% 
+      {if(input$loc == "Loc_ABS_Statistical_Area_3") filter(., Loc_ABS_Statistical_Area_3 == input$sa3) else .} %>% 
+      {if(input$loc == "Loc_ABS_Statistical_Area_4") filter(., Loc_ABS_Statistical_Area_4 == input$sa4) else .} %>% 
+      {if(input$loc == "Loc_Local_Government_Area") filter(., Loc_Local_Government_Area == input$lga) else .} %>% 
+      {if(input$loc == "Loc_ABS_Remoteness") filter(., Loc_ABS_Remoteness == input$remote) else .} %>% 
       filter(Crash_Year == 2017) %>% 
       summarise(
         count = length(Crash_Ref_Number),
@@ -78,7 +78,7 @@ function(input, output, session) {
   
   # draws from the posterior
   fatalityRateSim <- reactive({
-    rgamma(1e4, shape = 1.5 + fatalityRate()$n_fatalities, rate = 84 + fatalityRate()$count)
+    rgamma(1e4, shape = 1.33 + fatalityRate()$n_fatalities, rate = 56 + fatalityRate()$count)
   })
   
   # count of casualty type
@@ -187,7 +187,6 @@ function(input, output, session) {
   output$leafl <- renderUI({
     if(!is.null(input$GetScreenHeight)){
       width  <- session$clientData$output_image1_width
-      # print(session$clientData)
       height <- session$clientData$output_image1_height
       leafletOutput("accident_map", width = "100%", height = input$GetScreenHeight)
     }
