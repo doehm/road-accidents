@@ -21,13 +21,13 @@ try({
 }, TRUE)
 
 # set my theme and colours
-my_theme <- function(){
+my_theme <- function(y_on = element_blank()){
   theme_minimal() +
     theme(
       legend.position = "none",
       axis.text = element_text(family = "mont", size = 12),
       axis.text.x = element_text(angle = 45, vjust = 0.5),
-      axis.text.y = element_blank(),
+      axis.text.y = y_on,
       axis.title = element_blank(),
       plot.title = element_text(family = "mont", hjust = 0.5, face = "bold"),
       plot.subtitle = element_text(family = "mont", hjust = 0.5, face = "bold")
@@ -258,7 +258,7 @@ function(input, output, session) {
       geom_line(col = "darkmagenta") +
       geom_point(col = "darkmagenta") +
       coord_cartesian(ylim = c(0, max(df$count))) +
-      my_theme() +
+      my_theme(y_on = element_text(family = "mont")) +
       labs(title = "Number of accidents from 2001-2017")
   })
   
